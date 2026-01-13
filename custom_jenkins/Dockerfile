@@ -1,0 +1,27 @@
+# Use the Jenkins image as the base image
+FROM jenkins/jenkins:lts
+
+# Switch to root user to install dependencies
+USER root
+
+# Install prerequisites and Docker (Debian Trixie compatible)
+RUN apt-get update -y && \
+    apt-get install -y apt-transport-https ca-certificates curl gpg && \
+    curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker.gpg && \
+    chmod a+r /usr/share/keyrings/docker.gpg && \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker.gpg] https://download.docker.com/linux/debian trixie stable" > /etc/apt/sources.list.d/docker.list && \
+    apt-get update -y && \
+    apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Add Jenkins user to the Docker group
+RUN groupadd -f docker && \
+    usermod -aG docker jenkins
+
+# Create the Docker directory and volume for DinD
+RUN mkdir -p /var/lib/docker
+VOLUME /var/lib/docker
+
+# Switch back to the Jenkins user
+USER jenkins
