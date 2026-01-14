@@ -2,7 +2,7 @@ pipeline{
     agent any
 
     environment{
-        VEVN_DIR = 'venv'
+        VENV_DIR = 'venv'
     }
 
     stages{
